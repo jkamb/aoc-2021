@@ -1,18 +1,19 @@
 use anyhow::Result;
 use itertools::Itertools;
 
+type Input = [u32];
+
 fn parse(input: &str) -> Result<Vec<u32>> {
     let result: Vec<u32> = input
         .lines()
         .into_iter()
-        .map(|s| s.parse().unwrap())
+        .filter_map(|s| s.parse().ok())
         .collect();
     Ok(result)
 }
 
-fn part1(input: &str) -> Result<u32> {
-    let parsed = parse(input)?;
-    let result = parsed.iter().tuple_windows().fold(
+fn part1(input: &Input) -> Result<u32> {
+    let result = input.iter().tuple_windows().fold(
         0,
         |acc, (prev, next)| {
             if next > prev {
@@ -25,9 +26,8 @@ fn part1(input: &str) -> Result<u32> {
     Ok(result)
 }
 
-fn part2(input: &str) -> Result<u32> {
-    let parsed = parse(input)?;
-    let sums: Vec<u32> = parsed
+fn part2(input: &Input) -> Result<u32> {
+    let sums: Vec<u32> = input
         .iter()
         .tuple_windows()
         .map(|(a, b, c)| a + b + c)
@@ -47,34 +47,26 @@ fn part2(input: &str) -> Result<u32> {
 
 fn main() -> Result<()> {
     let input = include_str!("input.txt");
-    println!("{}", part1(input)?);
-    println!("{}", part2(input)?);
+    let input = parse(input)?;
+    println!("{}", part1(&input)?);
+    println!("{}", part2(&input)?);
     Ok(())
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    const INPUT: &str = r#"199
-200
-208
-210
-200
-207
-240
-269
-260
-263"#;
+    const INPUT: &str = include_str!("input_test.txt");
 
     #[test]
     fn test_part1() {
-        let res = part1(INPUT).unwrap();
+        let res = part1(&parse(INPUT).unwrap()).unwrap();
         assert_eq!(res, 7)
     }
 
     #[test]
     fn test_part2() {
-        let res = part2(INPUT).unwrap();
+        let res = part2(&parse(INPUT).unwrap()).unwrap();
         assert_eq!(res, 5)
     }
 }
