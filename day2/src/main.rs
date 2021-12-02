@@ -33,8 +33,11 @@ impl FromStr for SubmarineCommand {
     type Err = SubmarineError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (command, amount) = s.split(' ').collect_tuple().unwrap();
-        let amount: u32 = amount.parse().unwrap();
+        let (command, amount) = s
+            .split(' ')
+            .collect_tuple()
+            .ok_or(SubmarineError::ParseCommand)?;
+        let amount: u32 = amount.parse().map_err(|_| SubmarineError::ParseCommand)?;
         let result = match command {
             "forward" => Self::Forward(amount),
             "up" => Self::Up(amount),
@@ -50,13 +53,12 @@ impl FromStr for SubmarineCommand {
 type SubmarinePlan = Vec<SubmarineCommand>;
 type Input = [SubmarineCommand];
 
-fn parse(input: &str) -> Result<SubmarinePlan> {
-    let result = input
+fn parse(input: &str) -> Result<SubmarinePlan, SubmarineError> {
+    input
         .lines()
         .into_iter()
-        .map(|s| s.parse().unwrap())
-        .collect();
-    Ok(result)
+        .map(str::parse::<SubmarineCommand>)
+        .collect()
 }
 
 fn part1(input: &Input) -> Result<u32> {
